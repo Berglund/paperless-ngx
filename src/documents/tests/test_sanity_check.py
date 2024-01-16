@@ -16,35 +16,18 @@ class TestSanityCheck(DirectoriesMixin, TestCase):
     def make_test_data(self):
         with filelock.FileLock(settings.MEDIA_LOCK):
             # just make sure that the lockfile is present.
+            document_samples = Path(__file__).parent / "samples" / "documents"
             shutil.copy(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    "samples",
-                    "documents",
-                    "originals",
-                    "0000001.pdf",
-                ),
-                os.path.join(self.dirs.originals_dir, "0000001.pdf"),
+                document_samples / "originals" / "0000001.pdf",
+                self.dirs.originals_dir / "0000001.pdf",
             )
             shutil.copy(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    "samples",
-                    "documents",
-                    "archive",
-                    "0000001.pdf",
-                ),
-                os.path.join(self.dirs.archive_dir, "0000001.pdf"),
+                document_samples / "archive" / "0000001.pdf",
+                self.dirs.archive_dir / "0000001.pdf",
             )
             shutil.copy(
-                os.path.join(
-                    os.path.dirname(__file__),
-                    "samples",
-                    "documents",
-                    "thumbnails",
-                    "0000001.webp",
-                ),
-                os.path.join(self.dirs.thumbnail_dir, "0000001.webp"),
+                document_samples / "thumbnails" / "0000001.webp",
+                self.dirs.thumbnail_dir / "0000001.webp",
             )
 
         return Document.objects.create(

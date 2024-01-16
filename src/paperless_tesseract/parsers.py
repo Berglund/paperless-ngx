@@ -338,8 +338,8 @@ class RasterisedDocumentParser(DocumentParser):
         from ocrmypdf import InputFileError
         from ocrmypdf import SubprocessOutputError
 
-        archive_path = Path(os.path.join(self.tempdir, "archive.pdf"))
-        sidecar_file = Path(os.path.join(self.tempdir, "sidecar.txt"))
+        archive_path = self.tempdir / "archive.pdf"
+        sidecar_file = self.tempdir / "sidecar.txt"
 
         args = self.construct_ocrmypdf_parameters(
             document_path,
@@ -382,12 +382,8 @@ class RasterisedDocumentParser(DocumentParser):
                 f"Attempting force OCR to get the text.",
             )
 
-            archive_path_fallback = Path(
-                os.path.join(self.tempdir, "archive-fallback.pdf"),
-            )
-            sidecar_file_fallback = Path(
-                os.path.join(self.tempdir, "sidecar-fallback.txt"),
-            )
+            archive_path_fallback = self.tempdir / "archive-fallback.pdf"
+            sidecar_file_fallback = self.tempdir / "sidecar-fallback.txt"
 
             # Attempt to run OCR with safe settings.
 

@@ -1,5 +1,5 @@
-import os
 from collections import OrderedDict
+from pathlib import Path
 
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
@@ -69,15 +69,10 @@ class StandardPagination(PageNumberPagination):
 
 
 class FaviconView(View):
+    FAVICON = Path(__file__).parent / "static" / "paperless" / "img" / "favicon.ico"
+
     def get(self, request, *args, **kwargs):  # pragma: no cover
-        favicon = os.path.join(
-            os.path.dirname(__file__),
-            "static",
-            "paperless",
-            "img",
-            "favicon.ico",
-        )
-        with open(favicon, "rb") as f:
+        with self.FAVICON.open("rb") as f:
             return HttpResponse(f, content_type="image/x-icon")
 
 

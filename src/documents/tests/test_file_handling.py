@@ -66,7 +66,7 @@ class TestFileHandling(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         # test that creating dirs for the source_path creates the correct directory
         create_source_path_directory(document.source_path)
         Path(document.source_path).touch()
-        self.assertIsDir(os.path.join(settings.ORIGINALS_DIR, "none"))
+        self.assertIsDir(settings.ORIGINALS_DIR / "none")
 
         # Set a correspondent and save the document
         document.correspondent = Correspondent.objects.get_or_create(name="test")[0]
@@ -103,7 +103,7 @@ class TestFileHandling(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         )
 
         # Make the folder read- and execute-only (no writing and no renaming)
-        os.chmod(os.path.join(settings.ORIGINALS_DIR, "none"), 0o555)
+        os.chmod(settings.ORIGINALS_DIR / "none", 0o555)
 
         # Set a correspondent and save the document
         document.correspondent = Correspondent.objects.get_or_create(name="test")[0]
@@ -115,7 +115,7 @@ class TestFileHandling(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         )
         self.assertEqual(document.filename, "none/none.pdf")
 
-        os.chmod(os.path.join(settings.ORIGINALS_DIR, "none"), 0o777)
+        os.chmod(settings.ORIGINALS_DIR / "none", 0o777)
 
     @override_settings(FILENAME_FORMAT="{correspondent}/{correspondent}")
     def test_file_renaming_database_error(self):
@@ -149,9 +149,7 @@ class TestFileHandling(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
 
             # Check proper handling of files
             self.assertIsFile(document.source_path)
-            self.assertIsFile(
-                os.path.join(settings.ORIGINALS_DIR, "none/none.pdf"),
-            )
+            self.assertIsFile(settings.ORIGINALS_DIR / "none/none.pdf")
             self.assertEqual(document.filename, "none/none.pdf")
 
     @override_settings(FILENAME_FORMAT="{correspondent}/{correspondent}")
@@ -170,10 +168,8 @@ class TestFileHandling(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
 
         # Ensure file deletion after delete
         document.delete()
-        self.assertIsNotFile(
-            os.path.join(settings.ORIGINALS_DIR, "none", "none.pdf"),
-        )
-        self.assertIsNotDir(os.path.join(settings.ORIGINALS_DIR, "none"))
+        self.assertIsNotFile(settings.ORIGINALS_DIR / "none" / "none.pdf")
+        self.assertIsNotDir(settings.ORIGINALS_DIR / "none")
 
     @override_settings(
         FILENAME_FORMAT="{correspondent}/{correspondent}",
@@ -193,14 +189,12 @@ class TestFileHandling(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         Path(document.source_path).touch()
 
         # Ensure file was moved to trash after delete
-        self.assertIsNotFile(os.path.join(settings.TRASH_DIR, "none", "none.pdf"))
+        self.assertIsNotFile(settings.TRASH_DIR / "none" / "none.pdf")
         document.delete()
-        self.assertIsNotFile(
-            os.path.join(settings.ORIGINALS_DIR, "none", "none.pdf"),
-        )
-        self.assertIsNotDir(os.path.join(settings.ORIGINALS_DIR, "none"))
-        self.assertIsFile(os.path.join(settings.TRASH_DIR, "none.pdf"))
-        self.assertIsNotFile(os.path.join(settings.TRASH_DIR, "none_01.pdf"))
+        self.assertIsNotFile(settings.ORIGINALS_DIR / "none" / "none.pdf")
+        self.assertIsNotDir(settings.ORIGINALS_DIR / "none")
+        self.assertIsFile(settings.TRASH_DIR / "none.pdf")
+        self.assertIsNotFile(settings.TRASH_DIR / "none_01.pdf")
 
         # Create an identical document and ensure it is trashed under a new name
         document = Document()
@@ -211,7 +205,7 @@ class TestFileHandling(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         create_source_path_directory(document.source_path)
         Path(document.source_path).touch()
         document.delete()
-        self.assertIsFile(os.path.join(settings.TRASH_DIR, "none_01.pdf"))
+        self.assertIsFile(settings.TRASH_DIR / "none_01.pdf")
 
     @override_settings(FILENAME_FORMAT="{correspondent}/{correspondent}")
     def test_document_delete_nofile(self):
@@ -244,8 +238,8 @@ class TestFileHandling(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         document.save()
 
         # Check proper handling of files
-        self.assertIsDir(os.path.join(settings.ORIGINALS_DIR, "test"))
-        self.assertIsDir(os.path.join(settings.ORIGINALS_DIR, "none"))
+        self.assertIsDir(settings.ORIGINALS_DIR / "test")
+        self.assertIsDir(settings.ORIGINALS_DIR / "none")
         self.assertIsFile(important_file)
 
     @override_settings(FILENAME_FORMAT="{document_type} - {title}")
@@ -435,15 +429,13 @@ class TestFileHandling(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
         Path(document.source_path).touch()
 
         # Check proper handling of files
-        self.assertIsDir(os.path.join(settings.ORIGINALS_DIR, "none/none"))
+        self.assertIsDir(settings.ORIGINALS_DIR / "none/none")
 
         document.delete()
 
-        self.assertIsNotFile(
-            os.path.join(settings.ORIGINALS_DIR, "none/none/none.pdf"),
-        )
-        self.assertIsNotDir(os.path.join(settings.ORIGINALS_DIR, "none/none"))
-        self.assertIsNotDir(os.path.join(settings.ORIGINALS_DIR, "none"))
+        self.assertIsNotFile(settings.ORIGINALS_DIR / "none/none/none.pdf")
+        self.assertIsNotDir(settings.ORIGINALS_DIR / "none" / "none")
+        self.assertIsNotDir(settings.ORIGINALS_DIR / "none")
         self.assertIsDir(settings.ORIGINALS_DIR)
 
     @override_settings(FILENAME_FORMAT="{doc_pk}")
@@ -470,20 +462,20 @@ class TestFileHandling(DirectoriesMixin, FileSystemAssertsMixin, TestCase):
 
     def test_try_delete_empty_directories(self):
         # Create our working directory
-        tmp = os.path.join(settings.ORIGINALS_DIR, "test_delete_empty")
+        tmp = settings.ORIGINALS_DIR / "test_delete_empty"
         os.makedirs(tmp)
 
-        os.makedirs(os.path.join(tmp, "notempty"))
-        Path(os.path.join(tmp, "notempty", "file")).touch()
-        os.makedirs(os.path.join(tmp, "notempty", "empty"))
+        os.makedirs(tmp / "notempty")
+        Path(tmp / "notempty" / "file").touch()
+        os.makedirs(tmp / "notempty" / "empty")
 
         delete_empty_directories(
-            os.path.join(tmp, "notempty", "empty"),
+            tmp / "notempty" / "empty",
             root=settings.ORIGINALS_DIR,
         )
-        self.assertIsDir(os.path.join(tmp, "notempty"))
-        self.assertIsFile(os.path.join(tmp, "notempty", "file"))
-        self.assertIsNotDir(os.path.join(tmp, "notempty", "empty"))
+        self.assertIsDir(tmp / "notempty")
+        self.assertIsFile(tmp / "notempty" / "file")
+        self.assertIsNotDir(tmp / "notempty" / "empty")
 
     @override_settings(FILENAME_FORMAT="{created/[title]")
     def test_invalid_format(self):
