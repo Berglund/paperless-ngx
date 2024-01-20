@@ -1,6 +1,7 @@
 import logging
 import math
 import os
+import shutil
 from collections import Counter
 from contextlib import contextmanager
 from datetime import datetime
@@ -87,8 +88,10 @@ def open_index(recreate=False) -> FileIndex:
     except Exception:
         logger.exception("Error while opening the index, recreating.")
 
-    if not os.path.isdir(settings.INDEX_DIR):
-        os.makedirs(settings.INDEX_DIR, exist_ok=True)
+    # Remove the index directory, then create it again
+    if os.path.isdir(settings.INDEX_DIR):
+        shutil.rmtree(settings.INDEX_DIR)
+    os.makedirs(settings.INDEX_DIR, exist_ok=True)
     return create_in(settings.INDEX_DIR, get_schema())
 
 
